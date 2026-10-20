@@ -1,0 +1,166 @@
+/* =========================================================================
+   liquid-glass.css — a CSS approximation of SwiftUI's Liquid Glass API.
+   Visual approximation only (no real lensing of the framebuffer).
+
+   SwiftUI                                  ->  CSS
+   .glassEffect()                           ->  .lg
+   .glassEffect(.regular)                   ->  .lg  (default)
+   .glassEffect(.clear)                     ->  .lg.lg-clear   (+ .lg-dim on the backdrop)
+   .glassEffect(.identity)                  ->  .lg.lg-identity
+   .tint(color)                             ->  style="--lg-tint: rgba(...)"  or .lg-tint-blue …
+   .interactive()                           ->  .lg-interactive  (+ liquid-glass.js for pointer light)
+   in: .capsule / .circle / .rect(r) / .ellipse
+                                            ->  .lg-capsule / .lg-circle / .lg-rect (--lg-r) / .lg-ellipse
+   .buttonStyle(.glass)                     ->  .lg-btn
+   .buttonStyle(.glassProminent)            ->  .lg-btn.lg-prominent
+   .controlSize(.mini … .extraLarge)        ->  .lg-mini .lg-small .lg-large .lg-xl  (regular = default)
+   GlassEffectContainer                     ->  .lg-container   (children share ONE sampled surface)
+   glassEffectUnion(id:)                    ->  .lg-union       (children merged into one shape)
+   glassEffectID + withAnimation(.bouncy)   ->  .lg-morph + [data-open]  (animated expand / collapse)
+   accessibilityReduceTransparency          ->  @media (prefers-reduced-transparency: reduce)
+   accessibilityReduceMotion                ->  @media (prefers-reduced-motion: reduce)
+   Optional edge refraction: add .lg-refract and include the #lg-refract SVG filter (Chromium only).
+   ========================================================================= */
+
+:root{
+  --lg-r:22px;                 /* corner radius for .lg-rect */
+  --lg-tint:transparent;       /* .tint(...)                 */
+  --lg-fill:.10;               /* base white fill strength   */
+  --lg-blur:6px;
+  --lg-sat:160%;
+  --lg-ease-bouncy:cubic-bezier(.34,1.56,.64,1);
+}
+
+/* ---------- .glassEffect(.regular) ---------- */
+.lg{
+  --mx:50%;--my:0%;
+  position:relative;
+  isolation:isolate;
+  color:#fff;
+  text-shadow:0 1px 6px rgba(0,20,80,.35);          /* vibrant text on glass */
+  background:
+    linear-gradient(var(--lg-tint),var(--lg-tint)),
+    linear-gradient(135deg,rgba(255,255,255,calc(var(--lg-fill) + .02)),rgba(255,255,255,calc(var(--lg-fill) * .2)) 45%,rgba(255,255,255,calc(var(--lg-fill) * .6)));
+  -webkit-backdrop-filter:blur(var(--lg-blur)) saturate(var(--lg-sat));
+          backdrop-filter:blur(var(--lg-blur)) saturate(var(--lg-sat));
+  border:1px solid rgba(255,255,255,.32);
+  box-shadow:                                        /* specular rim + adaptive shadow */
+    inset 0 1.5px 0 rgba(255,255,255,.7),
+    inset 0 -1px 0 rgba(255,255,255,.18),
+    inset 1px 0 0 rgba(255,255,255,.25),
+    inset -1px 0 0 rgba(255,255,255,.12),
+    0 10px 30px rgba(0,8,40,.35);
+  border-radius:999px;                               /* default shape is a capsule, like SwiftUI */
+}
+/* specular sheen */
+.lg::before{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:-1;
+  background:
+    radial-gradient(120% 90% at 18% -10%,rgba(255,255,255,.45),rgba(255,255,255,0) 55%),
+    linear-gradient(115deg,rgba(255,255,255,0) 40%,rgba(255,255,255,.14) 50%,rgba(255,255,255,0) 60%);
+}
+/* pointer-following light (touch-point illumination) */
+.lg::after{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:-1;opacity:0;
+  transition:opacity .25s ease;
+  background:radial-gradient(180px circle at var(--mx) var(--my),rgba(255,255,255,.3),rgba(255,255,255,0) 70%);
+}
+
+/* ---------- variants ---------- */
+.lg-clear{--lg-fill:.04;--lg-blur:2px;--lg-sat:130%}   /* high transparency; put .lg-dim behind it */
+.lg-dim{position:relative}                              /* the dimming layer .clear needs */
+.lg-dim::before{content:"";position:absolute;inset:0;background:rgba(0,0,0,.3);pointer-events:none;border-radius:inherit}
+.lg-identity{                                           /* .identity: no effect, no layout change */
+  background:none;-webkit-backdrop-filter:none;backdrop-filter:none;border-color:transparent;box-shadow:none;text-shadow:none}
+.lg-identity::before,.lg-identity::after{display:none}
+
+/* ---------- shapes ---------- */
+.lg-capsule{border-radius:999px}
+.lg-circle{border-radius:50%;aspect-ratio:1;display:inline-grid;place-items:center}
+.lg-rect{border-radius:var(--lg-r)}
+.lg-ellipse{border-radius:50%}
+
+/* ---------- tint (use for primary action / state, not decoration) ---------- */
+.lg-tint-blue{--lg-tint:rgba(10,132,255,.38)}
+.lg-tint-green{--lg-tint:rgba(48,209,88,.34)}
+.lg-tint-orange{--lg-tint:rgba(255,159,10,.36)}
+.lg-tint-red{--lg-tint:rgba(255,69,58,.36)}
+.lg-tint-purple{--lg-tint:rgba(175,82,222,.36)}
+
+/* ---------- .interactive() ---------- */
+.lg-interactive{cursor:pointer;transition:transform .35s var(--lg-ease-bouncy),box-shadow .25s ease}
+.lg-interactive:hover::after{opacity:1}
+.lg-interactive:hover{transform:translateY(-1px) scale(1.02)}
+.lg-interactive:active{transform:scale(.96)}
+
+/* ---------- buttons ---------- */
+.lg-btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:.45em;
+  font:600 15px/1 system-ui,-apple-system,"Segoe UI",sans-serif;
+  padding:.8em 1.3em;                                   /* .regular */
+  cursor:pointer;transition:transform .35s var(--lg-ease-bouncy),box-shadow .25s ease;
+}
+.lg-btn:hover::after{opacity:1}
+.lg-btn:hover{transform:translateY(-1px) scale(1.02)}
+.lg-btn:active{transform:scale(.96)}
+.lg-mini{font-size:11px;padding:.55em .9em}
+.lg-small{font-size:13px;padding:.65em 1.05em}
+.lg-large{font-size:17px;padding:.95em 1.6em}
+.lg-xl{font-size:20px;padding:1.1em 2em}
+/* .glassProminent: opaque-ish tinted, content behind does not show through */
+.lg-prominent{
+  --lg-tint:rgba(10,132,255,1);
+  background:linear-gradient(rgba(255,255,255,.28),rgba(255,255,255,0) 55%),var(--lg-tint);
+  -webkit-backdrop-filter:none;backdrop-filter:none;
+  border-color:rgba(255,255,255,.45);
+}
+
+/* ---------- GlassEffectContainer: one shared glass surface ---------- */
+/* "Glass cannot sample other glass" -> items inside the container carry no glass of their own. */
+.lg-container{display:inline-flex;gap:var(--lg-gap,12px);padding:8px}
+.lg-container > .lg-item{
+  background:none;-webkit-backdrop-filter:none;backdrop-filter:none;border:0;box-shadow:none;
+  position:relative;display:inline-grid;place-items:center;min-width:44px;min-height:44px;color:#fff;
+  border-radius:inherit;cursor:pointer;transition:background .2s ease,transform .3s var(--lg-ease-bouncy);
+}
+.lg-container > .lg-item:hover{background:rgba(255,255,255,.14)}
+.lg-container > .lg-item:active{transform:scale(.94)}
+
+/* ---------- glassEffectUnion: several controls, one shape ---------- */
+.lg-union{display:inline-flex;flex-direction:column;border-radius:var(--lg-r);overflow:hidden}
+.lg-union.lg-row{flex-direction:row}
+.lg-union > *{background:none;border:0;padding:.7em 1em;color:inherit;font:inherit;cursor:pointer;transition:background .2s ease}
+.lg-union > * + *{border-top:1px solid rgba(255,255,255,.22)}
+.lg-union.lg-row > * + *{border-top:0;border-left:1px solid rgba(255,255,255,.22)}
+.lg-union > *:hover{background:rgba(255,255,255,.14)}
+
+/* ---------- glassEffectID morph (withAnimation(.bouncy)) ---------- */
+.lg-morph{display:inline-flex;align-items:center;gap:0;padding:6px}
+.lg-morph .lg-extra{
+  max-width:0;opacity:0;overflow:hidden;white-space:nowrap;transform:scale(.6);
+  transition:max-width .45s var(--lg-ease-bouncy),opacity .25s ease,transform .45s var(--lg-ease-bouncy),margin .45s var(--lg-ease-bouncy);
+}
+.lg-morph[data-open="true"] .lg-extra{max-width:160px;opacity:1;transform:none;margin-left:8px}
+
+/* ---------- optional edge refraction (needs the #lg-refract SVG filter, Chromium) ---------- */
+@supports (backdrop-filter:url(#x)){
+  .lg-refract{-webkit-backdrop-filter:url(#lg-refract) blur(2px) saturate(var(--lg-sat));
+                      backdrop-filter:url(#lg-refract) blur(2px) saturate(var(--lg-sat))}
+}
+
+/* ---------- accessibility & fallbacks ---------- */
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  .lg{background:rgba(24,34,64,.88)}
+}
+@media (prefers-reduced-transparency:reduce){        /* SwiftUI: accessibilityReduceTransparency */
+  .lg{background:rgba(24,34,64,.92);-webkit-backdrop-filter:none;backdrop-filter:none}
+  .lg-prominent{background:var(--lg-tint)}
+}
+@media (prefers-contrast:more){                      /* Increased Contrast: stark border */
+  .lg{border-color:#fff}
+}
+@media (prefers-reduced-motion:reduce){              /* SwiftUI: accessibilityReduceMotion */
+  .lg,.lg-btn,.lg-interactive,.lg-container > .lg-item,.lg-morph .lg-extra{transition:none}
+  .lg:hover,.lg:active{transform:none}
+  .lg::after{display:none}
+}

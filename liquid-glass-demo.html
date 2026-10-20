@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Liquid Glass CSS Demo</title>
+<link rel="stylesheet" href="liquid-glass.css">
+<style>
+  *{box-sizing:border-box;margin:0}
+  body{min-height:100vh;font:15px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif;color:#fff;padding:32px 20px 60px;
+    background:
+      radial-gradient(40% 30% at 15% 20%,#ff7a59 0,transparent 70%),
+      radial-gradient(40% 35% at 85% 25%,#4facfe 0,transparent 70%),
+      radial-gradient(45% 40% at 55% 85%,#7b5cff 0,transparent 70%),
+      linear-gradient(160deg,#0b1d4d,#1d0b3d)}
+  main{max-width:760px;margin:0 auto;display:grid;gap:26px}
+  h1{font-size:26px}
+  section{display:grid;gap:12px}
+  h2{font-size:13px;letter-spacing:.08em;text-transform:uppercase;opacity:.8}
+  .row{display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+  .pad{padding:14px 22px}
+  .photo{padding:26px;border-radius:26px;background:url("img/bg.webp") center/600px,#123}
+  code{font:12px ui-monospace,Consolas,monospace;opacity:.8}
+</style>
+</head>
+<body>
+<!-- optional refraction filter used by .lg-refract -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="lg-refract" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+    <feImage x="0" y="0" width="100%" height="100%" preserveAspectRatio="none" result="map" href="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='r' x1='0' x2='1' y1='0' y2='0'%3E%3Cstop offset='0' stop-color='rgb(255,0,0)'/%3E%3Cstop offset='.10' stop-color='rgb(128,0,0)'/%3E%3Cstop offset='.90' stop-color='rgb(128,0,0)'/%3E%3Cstop offset='1' stop-color='rgb(0,0,0)'/%3E%3C/linearGradient%3E%3ClinearGradient id='g' x1='0' x2='0' y1='0' y2='1'%3E%3Cstop offset='0' stop-color='rgb(0,255,0)'/%3E%3Cstop offset='.22' stop-color='rgb(0,128,0)'/%3E%3Cstop offset='.78' stop-color='rgb(0,128,0)'/%3E%3Cstop offset='1' stop-color='rgb(0,0,0)'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' fill='black'/%3E%3Crect width='100' height='100' fill='url(%23r)'/%3E%3Crect width='100' height='100' fill='url(%23g)' style='mix-blend-mode:screen'/%3E%3C/svg%3E"/>
+    <feDisplacementMap in="SourceGraphic" in2="map" scale="44" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+</svg>
+
+<main>
+  <h1>Liquid Glass → CSS</h1>
+
+  <section>
+    <h2>glassEffect — regular, default capsule</h2>
+    <div class="row"><div class="lg pad">Hello, Liquid Glass!</div>
+      <code>class="lg"</code></div>
+  </section>
+
+  <section>
+    <h2>Variants: regular · clear · identity</h2>
+    <div class="row">
+      <div class="lg pad">.regular</div>
+      <div class="lg lg-clear pad">.clear</div>
+      <div class="lg lg-identity pad">.identity</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Tint &amp; interactive</h2>
+    <div class="row">
+      <div class="lg lg-tint-blue pad">tint blue</div>
+      <div class="lg lg-tint-orange pad">tint orange</div>
+      <div class="lg lg-tint-purple lg-interactive pad">tint + interactive</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Shapes</h2>
+    <div class="row">
+      <div class="lg lg-capsule pad">capsule</div>
+      <div class="lg lg-circle lg-interactive" style="width:64px">♥</div>
+      <div class="lg lg-rect pad" style="--lg-r:16px">rect(16)</div>
+      <div class="lg lg-ellipse pad" style="padding:22px 34px">ellipse</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Button styles &amp; control sizes</h2>
+    <div class="row">
+      <button class="lg lg-btn lg-mini">mini</button>
+      <button class="lg lg-btn lg-small">small</button>
+      <button class="lg lg-btn">regular</button>
+      <button class="lg lg-btn lg-large">large</button>
+      <button class="lg lg-btn lg-xl">extraLarge</button>
+    </div>
+    <div class="row">
+      <button class="lg lg-btn">Cancel (.glass)</button>
+      <button class="lg lg-btn lg-prominent">Save (.glassProminent)</button>
+      <button class="lg lg-btn lg-circle lg-prominent lg-tint-green" style="--lg-tint:#30d158;width:48px">✓</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>GlassEffectContainer — one shared surface</h2>
+    <div class="row">
+      <div class="lg lg-container">
+        <span class="lg-item lg-circle">✎</span>
+        <span class="lg-item lg-circle">⌫</span>
+        <span class="lg-item lg-circle">⋯</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>glassEffectUnion — stacked controls, one shape (Maps zoom style)</h2>
+    <div class="row">
+      <div class="lg lg-union" style="--lg-r:16px"><button>＋</button><button>－</button></div>
+      <div class="lg lg-union lg-row lg-capsule"><button>Edit</button><button>Share</button><button>Delete</button></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>glassEffectID morph — click the button</h2>
+    <div class="row">
+      <div class="lg lg-morph" data-open="false">
+        <button class="lg lg-btn lg-prominent lg-circle" data-toggle style="width:48px" aria-label="Toggle">＋</button>
+        <button class="lg lg-btn lg-extra">Action 1</button>
+        <button class="lg lg-btn lg-extra">Action 2</button>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Refraction (Chromium) over detailed content</h2>
+    <div class="photo row">
+      <div class="lg lg-refract lg-rect pad" style="--lg-r:26px;min-width:260px;min-height:90px">.lg-refract — the tiles bend at the rim</div>
+    </div>
+  </section>
+</main>
+<script src="liquid-glass.js"></script>
+</body>
+</html>
