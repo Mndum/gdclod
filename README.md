@@ -17,6 +17,7 @@ then visit <http://localhost:8123>.
 | `index.html` | Page markup |
 | `style.css` | Layout and styling |
 | `script.js` | Canvas sizing and loading screen, smooth scroll, footer icon loader |
+| `gdclod.html` | Standalone single-file version (CSS, script and images embedded); open it on its own |
 | `img/` | Images used by the page |
 
 ## Game canvas
